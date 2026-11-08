@@ -157,21 +157,22 @@ essentials build includes the GPL encoders libx264/libx265, which
 is why the build is GPL rather than LGPL). The GPL-3.0 text is
 `LICENSE` in this repository.
 
-**Open item — Corresponding Source:** GPL-3.0 §6 requires whoever
-conveys the ffmpeg binary to also convey its Corresponding Source
-— in the same package (§6(a)), by a written offer valid at least
-3 years (§6(b)), or, for network distribution, by "equivalent
-access" to the source from the same place (§6(d)). A bare link to
-ffmpeg.org may NOT satisfy §6(d) for this exact third-party build:
-the duty attaches to the exact build being distributed (the gyan
-archive's own README names the exact FFmpeg commit it was built
-from), and whether pointing at ffmpeg's generic download page
-counts as equivalent access to *that* source is unresolved. This
-is stated plainly as an open item for the release: the safe shapes
-are hosting the exact Corresponding Source alongside the release,
-or making a §6(b) written offer for it. Nothing about DiscWright
-itself changes — ffmpeg.exe is a separate, unmodified program —
-but the source duty attaches to whoever conveys the binary.
+**Corresponding Source:** The bundled ffmpeg is the gyan.dev
+essentials build of FFmpeg 9.0.2 (package
+`ffmpeg-9.0.2-essentials_build.zip`, SHA-256 of the download
+pinned in `native-win/build-app.cmd`). The Corresponding Source
+for this build is the official FFmpeg 9.0.2 release source,
+available from the FFmpeg project's releases directory at
+ffmpeg.org/releases/ (file `ffmpeg-9.0.2.tar.xz`). In addition,
+as a written offer under GPL-3.0 §6(b): the DiscWright
+maintainer (GlitchedDot) offers to provide the complete
+Corresponding Source for the exact ffmpeg build bundled with
+DiscWright V1.0 to any third party who requests it, for a charge
+of no more than the reasonable cost of distribution; this offer
+is valid for at least three years from the V1.0 release date
+(2026-11-07) and for as long as spare parts / support are
+offered for V1.0. Contact via the GitHub repository
+(github.com/GlitchedDot/DiscWright).
 
 ### KissFFT and libgha
 
