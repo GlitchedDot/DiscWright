@@ -117,6 +117,15 @@ downloads its pinned tools (CMake, ffmpeg, libsndfile) and
 verifies each by SHA-256 before use. See `native-win/NOTES.md`
 for the design and the self-test.
 
+## A note on how this was made
+
+DiscWright was built by GlitchedDot working with Candy Pebbles,
+an AI assistant — the reverse-engineering harness, the authoring
+core, and all three apps were developed in that collaboration,
+with every result verified on real hardware by GlitchedDot.
+Local AI models (Qwen, via Ollama) pitched in on parts of the
+native ports.
+
 ## License
 
 DiscWright is Copyright (C) 2026 GlitchedDot, licensed under the
