@@ -666,13 +666,27 @@
   </div>
 
   <footer><small>The jewel-case moment is a love letter to <a href="https://github.com/annnguyentt/vibe-coding/tree/main/cd-case">Ann Nguyen's WebGL cd-case</a> — go look at the real thing, it's beautiful. Skin: a tribute to SonicStage, from GlitchedDot's own screenshots. Window and wallpapers: Claude's Aero glass, from the burn-aero mock.</small><br>
-  <small>Wallpaper: </small><select id="wall"></select><input type="file" id="wallFile" accept="image/*" hidden> <small>· build 2026-11-07.public3</small></footer>
+  <small>Wallpaper: </small><select id="wall"></select><input type="file" id="wallFile" accept="image/*" hidden> <small>· build 2026-11-08.public4</small> <small id="visitCount"></small></footer>
 </div>
   </div>
 </div>
 
 <script src="encoder/atrac3p.js"></script>
 <script type="module" src="app.js"></script>
+<script data-goatcounter="https://glitcheddot.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script>
+  // Tiny visit counter next to the build stamp. Reads GoatCounter's public
+  // site total (needs "Allow adding visitor counts" in the site settings);
+  // stays silent if unavailable. Decorative only — never break the app for it.
+  (async () => {
+    try {
+      const r = await fetch('https://glitcheddot.goatcounter.com/counter/TOTAL.json');
+      if (!r.ok) return;
+      const d = await r.json();
+      if (d && d.count) document.getElementById('visitCount').textContent = '· ' + d.count + ' visits';
+    } catch (e) { /* no counter, no problem */ }
+  })();
+</script>
 <div id="dragLayer"><div id="dragShadow"></div></div>
 </body>
 </html>
