@@ -1,0 +1,90 @@
+DiscWright — third-party notices (Mac app)
+============================================
+
+DiscWright itself is Copyright (C) 2026 GlitchedDot and is
+licensed under the GNU General Public License, version 3
+(see GPL-3.0.txt in this folder).
+
+DiscWright's bundled encoder (atracdenc, in Contents/Resources)
+was built from the third-party components below. Their licenses
+govern those components; the full license texts named here sit
+beside this file in the app bundle's Licenses folder.
+
+----------------------------------------------------------------
+atracdenc
+----------------------------------------------------------------
+Copyright (C) Dan Cherednik and contributors.
+License: GNU Lesser General Public License, version 2.1 or
+(at your option) any later version — LGPL-2.1-or-later.
+Full text: LGPL-2.1.txt (in this folder).
+
+atracdenc ships inside DiscWright as a separate executable
+(Contents/Resources/atracdenc) which DiscWright runs as a
+subprocess. It is statically linked with libsndfile (below)
+and contains KissFFT and libgha code (below).
+
+Source code for the exact version bundled here:
+  https://github.com/dcherednik/atracdenc
+  commit cb170709f836cb43dc0312455188c791159d81dc
+
+----------------------------------------------------------------
+libsndfile 1.2.2
+----------------------------------------------------------------
+Copyright (C) 1999-2018 Erik de Castro Lopo
+<erikd@mega-nerd.com> and contributors.
+License: GNU Lesser General Public License, version 2.1 or
+(at your option) any later version — LGPL-2.1-or-later.
+Full text: LGPL-2.1.txt (in this folder).
+
+In this build, libsndfile is compiled from its official source
+release and statically linked into the bundled atracdenc, with
+all optional external codec libraries disabled (WAV-family
+formats only). No separate libsndfile library ships in the app.
+
+Source code for the exact version bundled here:
+  https://github.com/libsndfile/libsndfile/releases/download/1.2.2/libsndfile-1.2.2.tar.xz
+  SHA-256: 3799ca9924d3125038880367bf1468e53a1b7e3686a934f098b7e1d286cdb80e
+
+----------------------------------------------------------------
+KissFFT (vendored inside atracdenc)
+----------------------------------------------------------------
+Copyright (c) 2003-2010, Mark Borgerding
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+    * Neither the author nor the names of any contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+----------------------------------------------------------------
+libgha (vendored inside atracdenc)
+----------------------------------------------------------------
+BSD 2-Clause License
+
+Copyright (c) 2018, Daniil Cherednik
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

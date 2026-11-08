@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DiscWright — ATRAC3+ CD ISO maker</title>
+<link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="icon" type="image/png" href="icon-192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+  :root {
+    --ss-blue: #1a1e6e;
+    --ss-blue-2: #232a86;
+    --ss-lav: #c2c9f4;
+    --ss-lav-light: #d6dbf8;
+    --ss-pane: #eceefc;
+    --ss-gray: #8d8d8d;
+    --ss-gray-dark: #5f5f5f;
+    --ss-text: #14141c;
+    --bad: #c81e1e;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    font-family: Tahoma, Verdana, "Segoe UI", sans-serif;
+    margin: 0; color: var(--ss-text); font-size: 14px;
+    overflow: hidden;
+    /* The Aero desktop backdrop, from Claude's burn-aero mock --
+       something pretty for the glass to blur. */
+    background:
+      radial-gradient(ellipse 60% 55% at 72% 28%, rgba(140,225,255,.95), transparent 70%),
+      radial-gradient(ellipse 50% 45% at 20% 80%, rgba(40,140,210,.9), transparent 70%),
+      radial-gradient(ellipse 35% 30% at 55% 70%, rgba(255,255,255,.35), transparent 70%),
+      linear-gradient(135deg, #07306b 0%, #1167b8 45%, #52b9e6 100%);
+  }
+  /* ---------- Aero glass window frame (Claude's burn-aero chrome) ---------- */
+  .window {
+    /* The window FITS the app (GlitchedDot, 2026-11-04): sized to the
+       content column (1060px wrap + its padding + this frame's),
+       centered on the desktop, and only as tall as the content --
+       capped by the viewport, past which the client area scrolls
+       like a real app's window. */
+    position: fixed; left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(1106px, calc(100vw - 48px));
+    max-height: calc(100vh - 48px);
+    display: grid; grid-template-rows: auto minmax(0, 1fr);
+    padding: 0 8px 8px;
+    border-radius: 8px;
+    background: linear-gradient(180deg, rgba(160,205,245,.92), rgba(110,165,225,.9));
+    box-shadow:
+      0 0 0 1px rgba(0,0,0,.65),
+      inset 0 0 0 1px rgba(255,255,255,.6),
+      0 8px 26px rgba(0,0,0,.55);
+  }
+  @supports (backdrop-filter: blur(1px)) {
+    .window {
+      background: linear-gradient(180deg, rgba(180,220,255,.55), rgba(110,170,235,.5));
+      backdrop-filter: blur(12px) saturate(1.5);
+      -webkit-backdrop-filter: blur(12px) saturate(1.5);
+    }
+  }
+  .window::before {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    background: linear-gradient(115deg, rgba(255,255,255,.35) 0%, rgba(255,255,255,.08) 28%, transparent 29%, transparent 55%, rgba(255,255,255,.12) 56%, transparent 80%);
+  }
+  .window.maxed {
+    left: 0; top: 0; transform: none;
+    width: 100vw; max-height: none; height: 100vh;
+    border-radius: 0; padding: 0 4px 4px;
+  }
+  .window.rolled { top: 24px; transform: translateX(-50%); padding-bottom: 0; }
+  .window.rolled .client { display: none; }
+  .titlebar {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 8px;
+    height: 30px; padding-left: 8px;
+    user-select: none;
+  }
+  .app-icon {
+    width: 16px; height: 16px; border-radius: 50%; flex: none;
+    background: radial-gradient(circle, #123a82 0 16%, transparent 17%),
+                conic-gradient(from 20deg, #dcecff, #fff, #8db6e8, #f0f7ff, #dcecff);
+    box-shadow: 0 0 0 1px rgba(0,0,0,.45), 0 0 5px rgba(255,255,255,.8);
+  }
+  .title {
+    flex: 1; color: #000; font-size: 13px;
+    text-shadow: 0 0 4px #fff, 0 0 7px #fff, 0 0 10px #fff, 0 0 13px #fff;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .wbtns { display: flex; align-self: flex-start; margin-right: 4px; }
+  .wbtn {
+    height: 19px; width: 28px; padding: 0; display: grid; place-items: center; cursor: pointer;
+    border: 1px solid rgba(0,0,0,.55); border-top: 0; margin-left: -1px; border-radius: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,.75) 0%, rgba(215,230,248,.55) 48%, rgba(150,185,230,.5) 50%, rgba(190,215,245,.7) 100%);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.55);
+  }
+  .wbtn:hover { background: linear-gradient(180deg, #fff 0%, #d9efff 48%, #8cd0f5 50%, #c4ecff 100%); }
+  .wbtn:active { filter: brightness(.88); }
+  .wbtn:first-child { border-bottom-left-radius: 5px; }
+  .wbtn.close {
+    width: 45px; border-bottom-right-radius: 5px; color: #fff;
+    background: linear-gradient(180deg, #e9b3a5 0%, #d3735e 48%, #b8310f 50%, #d45a3a 100%);
+  }
+  .wbtn.close:hover { background: linear-gradient(180deg, #ffd0c4 0%, #f08a6e 48%, #d4300a 50%, #ff7d55 100%); }
+  .wbtn svg { width: 11px; height: 11px; display: block; filter: drop-shadow(0 0 2px rgba(0,0,0,.7)); }
+  .client {
+    position: relative; z-index: 1; min-height: 0;
+    background: linear-gradient(180deg, var(--ss-blue-2), var(--ss-blue) 240px, var(--ss-blue));
+    border: 1px solid rgba(0,0,0,.55);
+    box-shadow: 0 0 0 1px rgba(255,255,255,.5);
+    overflow-y: auto;
+  }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 1.2em 1em 2.4em; }
+
+  /* ---- top mode tabs (SonicStage's purple segmented bar) ---- */
+  .modetabs {
+    /* Shrink-wrapped to its one visible tab (GlitchedDot, 2026-11-05):
+       the bar used to stretch 640px wide for a single label. */
+    display: flex; width: fit-content; margin: 0.4em auto 0;
+    border-radius: 999px; overflow: hidden;
+    border: 2px solid #0d0f45;
+    box-shadow: 0 2px 8px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.35);
+  }
+  .modetabs div {
+    flex: 0 0 auto; text-align: center; padding: 0.5em 1.8em; color: #cfd2ff;
+    background: linear-gradient(180deg, #4b34b8, #2a1a7e);
+    font-size: 0.95em; border-right: 1px solid rgba(0,0,0,.35);
+  }
+  .modetabs div:last-child { border-right: none; }
+  .modetabs .on {
+    color: #191970; font-weight: bold;
+    background: linear-gradient(180deg, #e3e6ff, #b9c0f2);
+  }
+  /* Music Source and My Library stay in the markup but hidden in
+     the web app (GlitchedDot, 2026-11-04) -- they belong to the Mac and
+     Windows versions. */
+  .modetabs .desktop { display: none; }
+
+  /* ---- transport strip ----
+     Hidden in the web app (GlitchedDot, 2026-11-04) -- it belongs to
+     the Mac and Windows versions. Kept in the markup. */
+  .transport {
+    margin-top: 0.9em; background: linear-gradient(180deg, #f4f4f6, #c9c9cf);
+    border: 1px solid #0d0f45; border-radius: 4px;
+    display: none; align-items: center; gap: 0.7em; padding: 0.45em 0.8em;
+    box-shadow: inset 0 1px 0 #fff;
+  }
+  .tbtn {
+    width: 44px; height: 28px; border-radius: 4px; border: 1px solid #7a7a7a;
+    background: linear-gradient(180deg, #ffffff, #bdbdc4); color: #333;
+    font-size: 0.85em; line-height: 1; box-shadow: inset 0 1px 0 #fff;
+  }
+  .tart {
+    width: 34px; height: 34px; flex: none; border: 1px solid #a05;
+    background: linear-gradient(135deg, #ffd3e0, #f27ba7 55%, #d6336c);
+    box-shadow: inset 0 0 6px rgba(255,255,255,.6);
+  }
+  #nowInfo { font-weight: bold; color: #22242e; }
+  .transport .spacer { flex: 1; }
+  .transport .mode {
+    border: 1px solid #7a7a7a; background: #efeff2; padding: 0.2em 0.6em;
+    font-size: 0.9em;
+  }
+
+  /* (The old "Create a CD" title band is gone -- it duplicated
+     the mode tab above it. GlitchedDot, 2026-11-05.) */
+  .subtitle { text-align: center; color: #b9bef5; margin: 0.7em 0 0.9em; font-size: 0.92em; }
+
+  /* ---- two panes, like Create a CD ---- */
+  .panels { display: flex; gap: 1.1em; align-items: stretch; }
+  .pane {
+    background: var(--ss-pane); border: 1px solid #0d0f45; border-radius: 3px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.4);
+    display: flex; flex-direction: column; min-width: 0;
+  }
+  .pane.left { flex: 1.25; }
+  .pane.right { flex: 1; }
+  .panehead {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 0.45em 0.7em 0.3em; font-weight: bold;
+  }
+  .panehead .free { font-weight: normal; font-size: 0.85em; color: #444; }
+  .panefoot {
+    margin-top: auto; background: var(--ss-gray); border-top: 1px solid #6d6d6d;
+    padding: 0.4em 0.6em; display: flex; gap: 0.5em; align-items: center;
+  }
+  .panefoot .spacer { flex: 1; }
+
+  /* ---- library (left) ---- */
+  #drop {
+    margin: 0.2em 0.7em 0.7em; border: 2px dashed #7d84c4; border-radius: 6px;
+    background: var(--ss-lav-light); color: #3c4170; text-align: center;
+    padding: 1.1em 0.8em; transition: all .15s ease;
+  }
+  #drop.over { border-color: #2a1a7e; background: #eef0ff; color: #191970; }
+  /* Groups and tracks in a Windows 7 Explorer-list style
+     (GlitchedDot, 2026-11-05): white cards, glassy header strips,
+     borderless fields that light up on hover/focus. */
+  .group {
+    margin: 0 0.7em 0.9em; background: #fff;
+    border: 1px solid #9db2c4; border-radius: 5px; overflow: hidden;
+    box-shadow: 0 1px 3px rgba(20, 50, 90, .18);
+  }
+  .group h3 {
+    margin: 0; font-size: 0.95em; color: #17324e;
+    background: linear-gradient(180deg, #f7fafc, #dde8f1);
+    border-bottom: 1px solid #b9cbd9;
+    padding: 0.35em 0.6em; display: flex; gap: 0.6em; align-items: center; flex-wrap: wrap;
+  }
+  .group h3 input {
+    font-weight: bold; font-size: 1em; padding: 0.18em 0.45em; width: 52%;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    background: linear-gradient(180deg, #fbfdfe, #e7eff6); color: #40607c;
+    border-bottom: 1px solid #c3d2df; text-align: left; font-weight: normal;
+    font-size: 0.85em; padding: 0.3em 0.45em;
+  }
+  td { padding: 0.22em 0.4em; vertical-align: middle; border-bottom: 1px solid #e6edf3; }
+  table tr:last-child td { border-bottom: none; }
+  tbody tr:nth-child(even) td, table tr:nth-child(even) td { background: #fafcfe; }
+  table tr:hover td { background: #e8f4fd; }
+  td input[type=text] { width: 96%; padding: 0.24em 0.35em; font-size: 0.95em; }
+  /* Text boxes in the Windows 7 style (GlitchedDot, 2026-11-05): a
+     real bordered field -- white, grey-blue edge that lights up
+     on hover, blue glow on focus, a whisper of inner shadow. */
+  input[type=text] {
+    background: linear-gradient(180deg, #fcfcfc, #ffffff);
+    border: 1px solid #abadb3; border-radius: 2px; color: var(--ss-text);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, .07);
+  }
+  input[type=text]:hover { border-color: #7eb4ea; }
+  input[type=text]:focus {
+    border-color: #2f7fc4; outline: none;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, .07), 0 0 5px rgba(84, 172, 236, .5);
+  }
+  .dur { color: #333; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .grip {
+    color: #8aa1b4; cursor: grab; text-align: center; width: 1.4em;
+    font-size: 0.9em; user-select: none; -webkit-user-select: none;
+  }
+  tr.dragging { opacity: .5; }
+  tr.dragging td { background: #d7ecfc; }
+  tr.drop-before td { box-shadow: inset 0 2px 0 #2f7fc4; }
+  tr.drop-after td { box-shadow: inset 0 -2px 0 #2f7fc4; }
+  /* Buttons in the Windows 7 Aero style (GlitchedDot, 2026-11-05):
+     glassy gradient, one-pixel slate border, blue glow on hover. */
+  button {
+    font-family: inherit; font-size: 0.92em; padding: 0.32em 0.9em; cursor: pointer;
+    color: #1b1b1b;
+    background: linear-gradient(180deg, #fcfdfe 0%, #eff3f7 45%, #e1e8ef 50%, #d3dde6 100%);
+    border: 1px solid #707c88; border-radius: 3px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 1px 2px rgba(20,45,75,.15);
+  }
+  button:hover:not(:disabled) {
+    border-color: #3c7fb1;
+    background: linear-gradient(180deg, #ecf7fe 0%, #d8eefb 45%, #bde2f7 50%, #a6d6f4 100%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 0 7px rgba(84,172,236,.6);
+  }
+  button:active:not(:disabled) {
+    background: linear-gradient(180deg, #c9e6f7, #a4d2f1);
+    box-shadow: inset 0 1px 4px rgba(23,67,110,.4);
+  }
+  button:disabled { opacity: .55; cursor: default; }
+  /* The per-track controls are mini buttons that fit the row. */
+  .trackbtns { white-space: nowrap; }
+  .trackbtns button {
+    width: 17px; height: 17px; padding: 0; margin-right: 2px;
+    font-size: 10px; line-height: 1; vertical-align: middle;
+  }
+  .trackbtns select {
+    height: 17px; font-size: 0.78em; margin-right: 2px;
+    padding: 0 1.3em 0 0.3em; background-position: right 0.35em center;
+    vertical-align: middle;
+  }
+  /* Adjustable columns (GlitchedDot, 2026-11-05): drag the right edge
+     of the Title/Artist/Album headers to resize, Explorer-style. */
+  table { table-layout: fixed; }
+  th { position: relative; }
+  .colgrip {
+    position: absolute; top: 0; right: -4px; width: 8px; height: 100%;
+    cursor: ew-resize; z-index: 2;
+  }
+  .colgrip:hover { background: rgba(60, 127, 177, .35); }
+  /* Dropdowns in the Windows 7 style (GlitchedDot, 2026-11-05): an
+     Aero-gradient combo box with its own chevron, glowing on
+     hover like the buttons, so it belongs with them. */
+  select {
+    -webkit-appearance: none; appearance: none;
+    font-family: inherit; font-size: 0.95em; color: #1b1b1b;
+    padding: 0.28em 2em 0.28em 0.55em; cursor: pointer;
+    border: 1px solid #707c88; border-radius: 3px;
+    background:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' fill='none' stroke='%233a4750' stroke-width='1.6'/></svg>") no-repeat right 0.6em center,
+      linear-gradient(180deg, #fcfdfe 0%, #eff3f7 45%, #e1e8ef 50%, #d3dde6 100%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 1px 2px rgba(20,45,75,.15);
+  }
+  select:hover {
+    border-color: #3c7fb1;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 0 7px rgba(84,172,236,.6);
+  }
+  select:focus {
+    border-color: #2f7fc4; outline: none;
+    box-shadow: 0 0 0 2px rgba(84,172,236,.35);
+  }
+  button:focus-visible { outline: 2px solid #3c7fb1; outline-offset: 1px; }
+
+  /* ---- ATRAC CD (right) ---- */
+  .discarea { padding: 0.4em 0.7em 0; text-align: center; }
+  .discarea .pleasenote { color: #555; margin: 0.6em 0 0.2em; }
+  .controls { padding: 0.7em; display: flex; flex-direction: column; gap: 0.7em; }
+  .controls .line { display: flex; gap: 0.8em; align-items: center; flex-wrap: wrap; }
+  #meterWrap {
+    background: #fff; border: 1px solid #6d6d6d; height: 14px; flex: 1; min-width: 140px;
+  }
+  #meter { height: 100%; width: 0%; background: linear-gradient(180deg, #7d84e8, #3a2a9e); transition: width .25s ease; }
+  #meter.full { background: linear-gradient(180deg, #f08a8a, #c81e1e); }
+  #meterText { font-variant-numeric: tabular-nums; }
+  #build {
+    width: 92px; height: 92px; border-radius: 50%; margin: 0; flex: none;
+    background: radial-gradient(circle at 35% 30%, #ffffff, #c9c9d2 45%, #8f8f9c 78%, #6f6f7c);
+    border: 2px solid #55555f; color: #23232c; font-weight: bold; font-size: 0.95em;
+    box-shadow: 0 4px 12px rgba(0,0,0,.35), inset 0 2px 3px #fff, inset 0 -3px 6px rgba(0,0,0,.25);
+  }
+  #build:hover:not(:disabled) { border-color: #2a1a7e; color: #191970; }
+  #importIso {
+    width: 68px; height: 68px; border-radius: 50%; flex: none;
+    background: radial-gradient(circle at 35% 30%, #ffffff, #c9c9d2 45%, #8f8f9c 78%, #6f6f7c);
+    border: 2px solid #55555f; color: #23232c; font-weight: bold; font-size: 0.8em;
+    box-shadow: 0 3px 9px rgba(0,0,0,.35), inset 0 2px 3px #fff, inset 0 -3px 6px rgba(0,0,0,.25);
+  }
+  #importIso:hover { border-color: #2a1a7e; color: #191970; }
+  #buildNote { text-align: center; }
+  #log {
+    margin: 0 0.7em 0.7em; background: #fff; border: 1px solid #9aa1d6;
+    padding: 0.7em 0.8em; white-space: pre-wrap; min-height: 4.2em;
+    font-family: ui-monospace, Menlo, monospace; font-size: 0.88em; line-height: 1.5;
+    max-height: 220px; overflow-y: auto;
+  }
+  #log .err { color: var(--bad); }
+  .err { color: var(--bad); }
+  small { color: #43435a; }
+  .pane.right small { color: #43435a; }
+  footer { margin-top: 1.2em; text-align: center; }
+  footer small { color: #b9bef5; }
+  footer a { color: #dfe3ff; }
+
+  /* ---- the drive stage (v6 choreography, GlitchedDot's direction) ----
+     Idle: the disc hovers and globe-spins over its shadow.
+     Build: the spin settles, a top-loading drive slides in from the
+     left, the disc tilts into the well, the semi-transparent lid
+     closes; track titles (Comic Sans) fly in from the right and are
+     sucked into the drive as each track encodes; then the disc
+     spins up and the laser tracks outward with the data written.
+     Done: lid opens, disc lifts into a jewel case, the case closes,
+     the drive fades away left and the case glides to center.
+     The scene is sized in % / cqw throughout, so it stays crisp at
+     any pane size or display resolution. */
+  #stage { text-align: center; margin: 0.4em 0 0.2em; }
+  .scene {
+    position: relative; width: 100%; aspect-ratio: 640 / 440;
+    container-type: inline-size;
+    overflow: hidden;
+  }
+
+  /* -- the top-loading drive (slides in from the left) -- */
+  .driveBack {
+    position: absolute; z-index: 1; left: 4.1%; top: 35%; width: 56.3%;
+    aspect-ratio: 360 / 178;
+    transform: translateX(-118%); opacity: 0;
+    transition: transform .9s cubic-bezier(.3,.7,.3,1), opacity .9s ease;
+  }
+  #stage.drivein .driveBack { transform: translateX(0); opacity: 1; }
+  #stage.driveout .driveBack { transform: translateX(-60%); opacity: 0; }
+  .lidPanel {
+    position: absolute; left: 5%; right: 5%; bottom: 97%; height: 52%;
+    background: linear-gradient(180deg, rgba(208,224,250,.34), rgba(188,206,238,.16));
+    border: 1px solid rgba(240,246,255,.8); border-bottom: none;
+    border-radius: 10px 10px 0 0;
+    transition: opacity .5s ease;
+  }
+  #stage.lidclosed .lidPanel { opacity: 0; }
+  .deck {
+    position: absolute; inset: 0; border-radius: 14px;
+    background: linear-gradient(160deg, #3a3f49, #22252c);
+    border: 1px solid #101216;
+    box-shadow: 0 12px 26px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.15);
+  }
+  .well {
+    position: absolute; left: 50%; top: 50%; width: 60%; height: 97%;
+    transform: translate(-50%, -50%); border-radius: 50%;
+    background: radial-gradient(ellipse at center, #262a32, #1c1f25 78%);
+    box-shadow: inset 0 2px 10px rgba(0,0,0,.65), inset 0 0 0 1px rgba(255,255,255,.05);
+  }
+  .spindleDot {
+    position: absolute; left: 50%; top: 50%; width: 5%; aspect-ratio: 1;
+    transform: translate(-50%, -50%); border-radius: 50%;
+    background: #59606e; box-shadow: inset 0 0 0 2px #30343c;
+  }
+  .deckDisplay {
+    position: absolute; right: 4%; top: 11%; padding: .05em .5em;
+    background: #0e1218; color: #6ede96; border-radius: 3px;
+    border: 1px solid rgba(255,255,255,.14);
+    font-family: ui-monospace, Menlo, monospace; font-size: 2.4cqw;
+  }
+  .deckBtn {
+    position: absolute; right: 8%; top: 42%; width: 6.5%; aspect-ratio: 1;
+    border-radius: 50%; border: 2px solid #6d7482;
+  }
+  .deckLed {
+    position: absolute; right: 9.3%; top: 73%; width: 3.4%; aspect-ratio: 1;
+    border-radius: 50%; background: #3a3f47;
+    transition: background .15s ease, box-shadow .15s ease;
+  }
+  #stage.burning .deckLed, .deckLed.on {
+    background: #ffb030; box-shadow: 0 0 9px 2px rgba(255,176,48,.55);
+  }
+  /* the semi-transparent lid, closed over deck + disc */
+  .driveCover {
+    position: absolute; z-index: 4; left: 4.7%; top: 36.8%; width: 55%; height: 36.8%;
+    border-radius: 12px; pointer-events: none;
+    background: linear-gradient(115deg, rgba(200,220,250,.17), rgba(190,208,238,.05) 45%, rgba(200,220,250,.11));
+    border: 1px solid rgba(238,244,255,0);
+    transform-origin: 50% 0%; transform: rotateX(-64deg); opacity: 0;
+    transition: transform .75s cubic-bezier(.3,.7,.3,1), opacity .75s ease,
+      border-color .75s ease, box-shadow .75s ease;
+  }
+  #stage.lidclosed .driveCover {
+    transform: rotateX(0); opacity: 1; border-color: rgba(238,244,255,.85);
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,.10), inset 0 0 26px rgba(190,215,255,.12);
+  }
+
+  /* -- the jewel case (ending) -- */
+  .caseBack, .caseFront {
+    position: absolute; z-index: 1; width: 36.9%; aspect-ratio: 1;
+    left: 59.4%; top: 25%;
+    transform: translateX(145%);
+    transition: left 1s cubic-bezier(.3,.7,.3,1), top 1s cubic-bezier(.3,.7,.3,1),
+      transform .7s cubic-bezier(.3,.7,.3,1);
+  }
+  .caseFront { z-index: 5; perspective: 1100px; pointer-events: none; }
+  #stage.casein .caseBack, #stage.casein .caseFront { transform: translateX(0); }
+  #stage.casecenter .caseBack, #stage.casecenter .caseFront { left: 31.6%; top: 23.6%; }
+  .caseTray {
+    position: absolute; inset: 0; border-radius: 7%;
+    background: linear-gradient(145deg, #3a3f4a, #22252c);
+    border: 1px solid #101216;
+    box-shadow: 0 12px 26px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.15);
+  }
+  .caseRing {
+    position: absolute; inset: 5.5%; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.10);
+    box-shadow: inset 0 2px 8px rgba(0,0,0,.45);
+  }
+  .caseLid {
+    position: absolute; inset: 0; border-radius: 7%;
+    background: linear-gradient(115deg, rgba(255,255,255,.20) 0%, rgba(255,255,255,.05) 40%,
+      rgba(255,255,255,.13) 65%, rgba(255,255,255,.04) 100%);
+    border: 1px solid rgba(255,255,255,.85);
+    box-shadow: inset 0 0 0 4px rgba(255,255,255,.06), inset 0 0 22px rgba(190,215,255,.10);
+    transform-origin: left center; transform: rotateY(-57deg);
+    transition: transform 1.1s cubic-bezier(.3,.7,.3,1);
+  }
+  #stage.caseclosed .caseLid { transform: rotateY(0); }
+
+  /* -- the disc rig: position anchor -> shadow / bob -> tilt -> Y-spin -> disc -- */
+  .discPos {
+    /* Idle: the disc hovers CENTERED in the pane (GlitchedDot, 2026-11-04).
+       It only moves sideways twice in its life: left into the drive
+       when a build starts, and right into the jewel case at the
+       end -- after which the case carries it back to center. */
+    position: absolute; z-index: 3; left: 50%; top: 46.6%; width: 0; height: 0;
+    transition: left 1.05s cubic-bezier(.35,.65,.3,1), top 1.05s cubic-bezier(.35,.65,.3,1);
+  }
+  #stage.seated .discPos { left: 32.2%; top: 55.2%; }
+  #stage.incased .discPos { left: 77.8%; top: 51.8%; }
+  #stage.casecenter .discPos { left: 50%; top: 50.5%; }
+  .discShadow {
+    position: absolute; left: 0; top: 23cqw; width: 27cqw; height: 3.6cqw;
+    transform: translate(-50%, -50%); border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,.55), rgba(0,0,0,0) 70%);
+    opacity: 0; transition: opacity .6s ease;
+  }
+  #stage.idle .discShadow { opacity: 1; }
+  /* the shadow's width is driven by the same JS spin angle as the
+     disc (it narrows as the disc turns edge-on) */
+  /* The bob and the tilt are drawn INSIDE the canvas now (see
+     below), so these wrappers carry no transforms or animations
+     at all. Five builds of evidence (2026-11-04): any continuously
+     transformed / blended / clipped DOM construction of the disc
+     makes the compositor on GlitchedDot's OCLP-patched 2014 MacBook paint
+     a black bar down it. A single flat canvas bitmap is the fix. */
+  .discBob { }
+  .discTilt { }
+  /* THE DISC IS A CANVAS. JS paints the whole disc -- base, sheen,
+     laser, hub, label, spin squash, tilt, bob, shading -- into one
+     flat bitmap, using the same math as the approved preview GIFs.
+     The element itself has NO transform (it is centered by negative
+     offsets), no children, no blend modes, no clipping: there is
+     nothing for a compositor to split into a bar. */
+  .discY { }
+  #discCanvas {
+    position: absolute; left: -17.35cqw; top: -17.35cqw;
+    width: 34.7cqw; aspect-ratio: 1;
+    /* Playful drag (GlitchedDot, 2026-11-05): the idle disc is grabbable.
+       touch-action none so a touch-drag plays instead of scrolling. */
+    cursor: grab; touch-action: none;
+  }
+  /* -- full-screen drag layer (GlitchedDot, 2026-11-05): when the idle
+     disc is grabbed it lifts into this fixed layer and can roam
+     the ENTIRE screen, not just the scene box. Its roaming shadow
+     is a plain ellipse div alongside it. -- */
+  #dragLayer { position: fixed; inset: 0; z-index: 9998; pointer-events: none; }
+  #dragShadow {
+    position: fixed; display: none; border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,.55), rgba(0,0,0,0) 70%);
+  }
+  #discCanvas.lifted { position: fixed; z-index: 9999; pointer-events: auto; margin: 0; }
+  /* -- track-title chips, sucked in from the right -- */
+  .chipLayer { position: absolute; inset: 0; overflow: hidden; z-index: 6; pointer-events: none; }
+  .chip {
+    position: absolute; top: 54.5%; transform: translateY(-50%);
+    background: linear-gradient(180deg, #454c5e, #333947); color: #eef1ff;
+    border: 1px solid #969eb4; border-radius: .5em; padding: .28em .7em;
+    font-family: "Comic Sans MS", "Comic Neue", "Chalkboard SE", "Segoe Print", cursive;
+    font-size: 2.9cqw; white-space: nowrap;
+    box-shadow: 0 3px 8px rgba(0,0,0,.35);
+  }
+  #stageStatus { margin-top: 0.7em; color: #3c4170; min-height: 1.35em; font-weight: bold; }
+  @media (prefers-reduced-motion: reduce) {
+    .driveBack, .discPos, .driveCover, .caseLid,
+    .caseBack, .caseFront { transition: none; }
+  }
+  @media (max-width: 760px) {
+    .panels { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="window" id="win">
+  <div class="titlebar">
+    <div class="app-icon"></div>
+    <div class="title">DiscWright - Create a CD</div>
+    <div class="wbtns">
+      <button class="wbtn" id="bMin" title="Minimize" aria-label="Minimize">
+        <svg viewBox="0 0 10 10"><rect x="1" y="6.5" width="6.5" height="2.2" fill="#fff" stroke="#1d2f4d" stroke-width=".6"/></svg>
+      </button>
+      <button class="wbtn" id="bMax" title="Maximize" aria-label="Maximize">
+        <svg viewBox="0 0 10 10"><rect x="1.2" y="1.2" width="7.6" height="7.6" fill="none" stroke="#1d2f4d" stroke-width="2.4"/><rect x="1.2" y="1.2" width="7.6" height="7.6" fill="none" stroke="#fff" stroke-width="1.2"/></svg>
+      </button>
+      <button class="wbtn close" id="bClose" title="Close" aria-label="Close">
+        <svg viewBox="0 0 10 10"><path d="M1.6 1.6l6.8 6.8M8.4 1.6l-6.8 6.8" stroke="#fff" stroke-width="2" stroke-linecap="square"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="client">
+<div class="wrap">
+
+  <div class="modetabs">
+    <div class="desktop">Music Source</div>
+    <div class="desktop">My Library</div>
+    <div class="on">Create a CD</div>
+  </div>
+
+  <div class="transport">
+    <button class="tbtn" tabindex="-1">▶</button>
+    <button class="tbtn" tabindex="-1">■</button>
+    <button class="tbtn" tabindex="-1">⏮</button>
+    <button class="tbtn" tabindex="-1">⏭</button>
+    <div class="tart"></div>
+    <span id="nowInfo">DiscWright</span>
+    <span class="spacer"></span>
+    <span class="mode">Normal ▾</span>
+  </div>
+
+  <p class="subtitle">Add songs to My Library, arrange them into groups, and write them to an ATRAC CD image. Everything happens in this page — nothing is uploaded anywhere.</p>
+
+  <div class="panels">
+    <section class="pane left">
+      <div class="panehead"><span>My Library</span><span class="free" id="libInfo"></span></div>
+      <div id="drop">Drag audio files or a folder here, or pick files <input type="file" id="picker" multiple accept="audio/*,.mp3,.m4a,.wav,.flac,.ogg,.aif,.aiff"> or a folder <input type="file" id="folderPicker" webkitdirectory> <small>(folders are searched up to 2 levels deep)</small></div>
+      <div id="groups"></div>
+      <div class="panefoot">
+        <button id="addGroup">+ Add group</button>
+        <span class="spacer"></span>
+        <span><small>Groups become the disc's playlists.</small></span>
+      </div>
+    </section>
+
+    <section class="pane right">
+      <div class="panehead"><span>ATRAC CD</span><span class="free">Drive: ISO image</span></div>
+      <div class="discarea">
+        <div id="stage" class="idle" aria-hidden="false">
+          <div class="scene" id="scene">
+            <div class="driveBack">
+              <div class="lidPanel"></div>
+              <div class="deck">
+                <div class="well"></div>
+                <div class="spindleDot"></div>
+                <div class="deckDisplay">CD</div>
+                <div class="deckBtn"></div>
+                <div class="deckLed" id="deckLed"></div>
+              </div>
+            </div>
+            <div class="caseBack">
+              <div class="caseTray"><div class="caseRing"></div></div>
+            </div>
+            <div class="discPos" id="discPos">
+              <div class="discShadow"></div>
+              <div class="discBob">
+                <div class="discTilt" id="discTilt">
+                  <div class="discY" id="discY">
+                    <canvas id="discCanvas" width="720" height="720"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="driveCover"></div>
+            <div class="caseFront"><div class="caseLid"></div></div>
+            <div class="chipLayer" id="chipLayer"></div>
+          </div>
+          <div id="stageStatus">Please select a type of disc.</div>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="line">
+          <label>Blank:
+            <select id="blank"></select>
+          </label>
+          <div id="meterWrap"><div id="meter"></div></div>
+        </div>
+        <div class="line">
+          <label>Laser position:
+            <select id="laserPos">
+              <option value="270">Top</option>
+              <option value="315">Top-right</option>
+              <option value="0">Right</option>
+              <option value="45">Bottom-right</option>
+              <option value="90" selected>Bottom</option>
+              <option value="135">Bottom-left</option>
+              <option value="180">Left</option>
+              <option value="225">Top-left</option>
+            </select>
+          </label>
+        </div>
+        <div class="line"><span id="meterText">0 tracks</span></div>
+        <div class="line" style="justify-content: center;">
+          <button id="build" disabled>Build<br>ISO</button>
+          <button id="importIso" title="Open an ISO made earlier — by DiscWright or SonicStage — and see its groups and tracks. Read-only: an authored disc can't be edited, only burned or cleared.">Import<br>ISO</button>
+          <input type="file" id="isoPicker" accept=".iso" hidden>
+        </div>
+        <div class="line" style="justify-content: center;">
+          <button id="clearImport" hidden>✕ Clear imported disc</button>
+        </div>
+        <div class="line">
+          <button id="cleanExport" disabled title="Download copies of the current tracks with every ID3v2 tag (album art included) stripped and only an ID3v1.1 tag written. Your original files are never touched.">Export cleaned MP3s (.zip)</button>
+        </div>
+        <div id="buildNote"><small>The encoder is loading…</small></div>
+      </div>
+      <div id="log">Ready.</div>
+      <div class="panefoot">
+        <span><small>Burn the ISO as a plain single-session disc image.</small></span>
+      </div>
+    </section>
+  </div>
+
+  <footer><small>The jewel-case moment is a love letter to <a href="https://github.com/annnguyentt/vibe-coding/tree/main/cd-case">Ann Nguyen's WebGL cd-case</a> — go look at the real thing, it's beautiful. Skin: a tribute to SonicStage, from GlitchedDot's own screenshots. Window and wallpapers: Claude's Aero glass, from the burn-aero mock.</small><br>
+  <small>Wallpaper: </small><select id="wall"></select><input type="file" id="wallFile" accept="image/*" hidden> <small>· build 2026-11-07.public3</small></footer>
+</div>
+  </div>
+</div>
+
+<script src="encoder/atrac3p.js"></script>
+<script type="module" src="app.js"></script>
+<div id="dragLayer"><div id="dragShadow"></div></div>
+</body>
+</html>

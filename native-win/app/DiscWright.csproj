@@ -1,0 +1,94 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- DiscWright for Windows — WinUI 3 face on the byte-proven
+       DiscWright.Core library. Step 2 of Stage 3.
+       UNPACKAGED (WindowsPackageType None) + SELF-CONTAINED:
+       the build output is a plain folder with DiscWright.exe
+       that runs by double-click — no MSIX install, no separate
+       Windows App SDK or .NET runtime install. -->
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>DiscWright</RootNamespace>
+    <AssemblyName>DiscWright</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>DiscWright.ico</ApplicationIcon>
+    <Platforms>x64</Platforms>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <UseWinUI>true</UseWinUI>
+    <WindowsPackageType>None</WindowsPackageType>
+    <!-- PRI generation stays ON (the default): an unpackaged WinUI 3 app
+         needs its generated DiscWright.pri beside the exe at runtime —
+         without it the app crashes on launch (0xc000027b). A brief v19
+         experiment with AppxGeneratePriEnabled=false was reverted the
+         same day for exactly that reason; the MSB4062 it chased is fixed
+         by building with Visual Studio's MSBuild instead (build-app.cmd),
+         which finds the PRI/AppX tasks in its own folders. -->
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <SelfContained>true</SelfContained>
+    <!-- v33: the native single-file variant's extra properties,
+         switched on ONLY by build-singlefile.cmd passing
+         /p:DiscWrightSingleFile=true — v32's folder build
+         never sees them. Microsoft's WindowsAppSDKSingleFile
+         configuration (WASDK >= 1.5) requires all three for
+         an unpackaged self-contained app. -->
+    <EnableMsixTooling Condition="'$(DiscWrightSingleFile)' == 'true'">true</EnableMsixTooling>
+    <IncludeAllContentForSelfExtract Condition="'$(DiscWrightSingleFile)' == 'true'">true</IncludeAllContentForSelfExtract>
+    <PublishSingleFile Condition="'$(DiscWrightSingleFile)' == 'true'">true</PublishSingleFile>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!-- The PRI/AppX MSBuild tasks (Microsoft.Build.Packaging.Pri.Tasks.dll)
+         ship with Visual Studio, NOT the bare .NET SDK; the Windows App SDK
+         targets look for them under the SDK's own folders and the build
+         fails with MSB4062. When a VS 2022 install exists, point the tools
+         path at it (the WASDK targets honor a preset AppxMSBuildToolsPath).
+         Added 2026-11-06 after the gaming-PC build hit MSB4062. -->
+    <AppxMSBuildToolsPath Condition="'$(AppxMSBuildToolsPath)' == '' and Exists('C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VisualStudio\v17.0\AppxPackage\Microsoft.Build.Packaging.Pri.Tasks.dll')">C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VisualStudio\v17.0\AppxPackage\</AppxMSBuildToolsPath>
+    <AppxMSBuildToolsPath Condition="'$(AppxMSBuildToolsPath)' == '' and Exists('C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Microsoft\VisualStudio\v17.0\AppxPackage\Microsoft.Build.Packaging.Pri.Tasks.dll')">C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Microsoft\VisualStudio\v17.0\AppxPackage\</AppxMSBuildToolsPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Floating minor versions: restore takes the newest
+         patch of the pinned minor line, so a retired exact
+         patch version can never break the build. If restore
+         ever fails on these, pinning exact versions is the
+         first knob (see APP-NOTES.md, Step 2 risks). -->
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.*" />
+    <PackageReference Include="Microsoft.Graphics.Win2D" Version="1.3.*" />
+    <ProjectReference Include="..\core\DiscWright.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The app icon as a loose file beside the exe, in
+         addition to the ApplicationIcon resource above:
+         MainWindow hands it to AppWindow.SetIcon so the
+         window's titlebar wears the DW disc too. -->
+    <Content Include="DiscWright.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <!-- v33: the encoder tools as project content — ONLY for
+       the single-file publish. Today they are not project
+       content at all: build scripts copy them beside the
+       exe after the build, so a single-file bundle would
+       silently omit them and every encode would fail
+       "ffmpeg was not found". Linked into a tools\ folder
+       in the output (EncodeService looks for
+       <base>\tools\ffmpeg.exe / atracdenc.exe, sndfile.dll
+       rides beside atracdenc). ExcludedFromSingleFile keeps
+       them as loose content files that the self-extract
+       carries, instead of embedding them inside the main
+       assembly. The files exist by the time MSBuild runs:
+       the build scripts' tools stage prepares
+       native-win\tools\ first. The folder build never sets
+       DiscWrightSingleFile, so it never sees these items. -->
+  <ItemGroup Condition="'$(DiscWrightSingleFile)' == 'true'">
+    <Content Include="..\tools\ffmpeg.exe"><Link>tools\ffmpeg.exe</Link><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory><CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory><ExcludeFromSingleFile>true</ExcludeFromSingleFile></Content>
+    <Content Include="..\tools\atracdenc.exe"><Link>tools\atracdenc.exe</Link><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory><CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory><ExcludeFromSingleFile>true</ExcludeFromSingleFile></Content>
+    <Content Include="..\tools\sndfile.dll"><Link>tools\sndfile.dll</Link><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory><CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory><ExcludeFromSingleFile>true</ExcludeFromSingleFile></Content>
+  </ItemGroup>
+
+</Project>

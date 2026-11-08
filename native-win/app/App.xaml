@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- App.xaml — DiscWright's theme dictionaries. The app does
+     NOT pin an appearance: WinUI follows the system theme, and
+     BOTH themes are designed (the Mac Step 3 lesson — Lola
+     likes dark mode at night). Light values are the approved
+     Mac look (Theme.swift constants); Dark values are the Mac
+     Palette.dark set. Appearance-neutral brushes (client and
+     header gradients, meter fills, log border) are shared
+     resources below the theme dictionaries. -->
+<Application
+    x:Class="DiscWright.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:DiscWright">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="PaneBrush" Color="#FFECEEFC"/>
+                    <SolidColorBrush x:Key="PaneTextBrush" Color="#FF14141C"/>
+                    <SolidColorBrush x:Key="SecondaryTextBrush" Color="#FF5F5F5F"/>
+                    <LinearGradientBrush x:Key="CardHeaderGradientBrush" StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#FFF7FAFC" Offset="0"/>
+                        <GradientStop Color="#FFDDE8F1" Offset="1"/>
+                    </LinearGradientBrush>
+                    <SolidColorBrush x:Key="CardHeaderTextBrush" Color="#FF17324E"/>
+                    <SolidColorBrush x:Key="CardHeaderBorderBrush" Color="#FFB9CBD9"/>
+                    <SolidColorBrush x:Key="CardBorderBrush" Color="#FF9DB2C4"/>
+                    <SolidColorBrush x:Key="RowBackgroundBrush" Color="#FFFFFFFF"/>
+                    <SolidColorBrush x:Key="RowSeparatorBrush" Color="#FFE6EDF3"/>
+                    <SolidColorBrush x:Key="LogBackgroundBrush" Color="#FFFFFFFF"/>
+                    <SolidColorBrush x:Key="LogTextBrush" Color="#FF14141C"/>
+                    <SolidColorBrush x:Key="MeterTrackBrush" Color="#FFFFFFFF"/>
+                    <SolidColorBrush x:Key="StageStatusBrush" Color="#FF3C4170"/>
+                    <SolidColorBrush x:Key="SmallTextBrush" Color="#FF43435A"/>
+                    <SolidColorBrush x:Key="DurTextBrush" Color="#FF333333"/>
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="PaneBrush" Color="#FF23265E"/>
+                    <SolidColorBrush x:Key="PaneTextBrush" Color="#FFE6E9FF"/>
+                    <SolidColorBrush x:Key="SecondaryTextBrush" Color="#FFAAB0E8"/>
+                    <LinearGradientBrush x:Key="CardHeaderGradientBrush" StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#FF2A2E63" Offset="0"/>
+                        <GradientStop Color="#FF1E214E" Offset="1"/>
+                    </LinearGradientBrush>
+                    <SolidColorBrush x:Key="CardHeaderTextBrush" Color="#FFDFE4FF"/>
+                    <SolidColorBrush x:Key="CardHeaderBorderBrush" Color="#FF3A3F7D"/>
+                    <SolidColorBrush x:Key="CardBorderBrush" Color="#FF3A3F7D"/>
+                    <SolidColorBrush x:Key="RowBackgroundBrush" Color="#FF262A66"/>
+                    <SolidColorBrush x:Key="RowSeparatorBrush" Color="#FF343A75"/>
+                    <SolidColorBrush x:Key="LogBackgroundBrush" Color="#FF14163A"/>
+                    <SolidColorBrush x:Key="LogTextBrush" Color="#FFD6DBF8"/>
+                    <SolidColorBrush x:Key="MeterTrackBrush" Color="#FF14163A"/>
+                    <SolidColorBrush x:Key="StageStatusBrush" Color="#FFC9CDF5"/>
+                    <SolidColorBrush x:Key="SmallTextBrush" Color="#FFAAB0E8"/>
+                    <SolidColorBrush x:Key="DurTextBrush" Color="#FFC9CDF5"/>
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Default">
+                    <SolidColorBrush x:Key="PaneBrush" Color="#FFECEEFC"/>
+                    <SolidColorBrush x:Key="PaneTextBrush" Color="#FF14141C"/>
+                    <SolidColorBrush x:Key="SecondaryTextBrush" Color="#FF5F5F5F"/>
+                    <LinearGradientBrush x:Key="CardHeaderGradientBrush" StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#FFF7FAFC" Offset="0"/>
+                        <GradientStop Color="#FFDDE8F1" Offset="1"/>
+                    </LinearGradientBrush>
+                    <SolidColorBrush x:Key="CardHeaderTextBrush" Color="#FF17324E"/>
+                    <SolidColorBrush x:Key="CardHeaderBorderBrush" Color="#FFB9CBD9"/>
+                    <SolidColorBrush x:Key="CardBorderBrush" Color="#FF9DB2C4"/>
+                    <SolidColorBrush x:Key="RowBackgroundBrush" Color="#FFFFFFFF"/>
+                    <SolidColorBrush x:Key="RowSeparatorBrush" Color="#FFE6EDF3"/>
+                    <SolidColorBrush x:Key="LogBackgroundBrush" Color="#FFFFFFFF"/>
+                    <SolidColorBrush x:Key="LogTextBrush" Color="#FF14141C"/>
+                    <SolidColorBrush x:Key="MeterTrackBrush" Color="#FFFFFFFF"/>
+                    <SolidColorBrush x:Key="StageStatusBrush" Color="#FF3C4170"/>
+                    <SolidColorBrush x:Key="SmallTextBrush" Color="#FF43435A"/>
+                    <SolidColorBrush x:Key="DurTextBrush" Color="#FF333333"/>
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+            <!-- The two converters live AFTER the theme dictionaries
+                 on purpose: entries before the ThemeDictionaries
+                 block make the WinUI XAML compiler die silently
+                 (bisect v8/v9, 2026-11-06). Do not move them back. -->
+            <local:BoolToVisibilityConverter x:Key="BoolToVis"/>
+            <local:InverseBoolToVisibilityConverter x:Key="InvBoolToVis"/>
+
+            <!-- Shared, appearance-neutral (Theme.swift's
+                 gradients and constants that read on both). -->
+            <LinearGradientBrush x:Key="ClientGradientBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="#FF232A86" Offset="0"/>
+                <GradientStop Color="#FF1A1E6E" Offset="1"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="HeaderGradientBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="#FF4B34B8" Offset="0"/>
+                <GradientStop Color="#FF2A1A7E" Offset="1"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="ModePillGradientBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="#FFE3E6FF" Offset="0"/>
+                <GradientStop Color="#FFB9C0F2" Offset="1"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="MeterFillBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="#FF7D84E8" Offset="0"/>
+                <GradientStop Color="#FF3A2A9E" Offset="1"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="MeterOverBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="#FFF08A8A" Offset="0"/>
+                <GradientStop Color="#FFC81E1E" Offset="1"/>
+            </LinearGradientBrush>
+            <SolidColorBrush x:Key="LogBorderBrush" Color="#FF9AA1D6"/>
+            <SolidColorBrush x:Key="DeepBorderBrush" Color="#FF0D0F45"/>
+            <SolidColorBrush x:Key="SsBlue2Brush" Color="#FF232A86"/>
+            <SolidColorBrush x:Key="MeterBorderBrush" Color="#FF6D6D6D"/>
+            <SolidColorBrush x:Key="BadBrush" Color="#FFC81E1E"/>
+            <SolidColorBrush x:Key="SubtitleOnBlueBrush" Color="#FFB9BEF5"/>
+            <SolidColorBrush x:Key="ModePillTextBrush" Color="#FF191970"/>
+            <SolidColorBrush x:Key="GlyphHubBrush" Color="#FF123A82"/>
+            <SolidColorBrush x:Key="SsLavBrush" Color="#FFC2C9F4"/>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
