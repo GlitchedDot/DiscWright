@@ -2,6 +2,11 @@
 
 by **GlitchedDot**
 
+> **Not the GOG one.** This DiscWright makes ATRAC3+ CDs for Sony
+> ATRAC CD Walkmans. A different, unrelated tool that shares the
+> name turns GOG offline installers into game discs — that's not
+> this, and this isn't that.
+
 DiscWright makes ATRAC3+ CDs that play in Sony ATRAC CD Walkmans —
 discs like the ones Sony's SonicStage used to make, for players
 like the D-NE1. Sony discontinued that whole world years ago;
