@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleName</key>
-	<string>DiscWright</string>
+	<string>WrightDisc</string>
 	<key>CFBundleDisplayName</key>
-	<string>DiscWright</string>
+	<string>WrightDisc</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.glitcheddot.discwright</string>
 	<key>CFBundleVersion</key>

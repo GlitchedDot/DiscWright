@@ -22,7 +22,7 @@ rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
 cp selftest.swift "$BUILD_DIR/main.swift"
 
-echo "Compiling the DiscWright Swift core + self-test..."
+echo "Compiling the WrightDisc Swift core + self-test..."
 swiftc -O core/*.swift "$BUILD_DIR/main.swift" -o selftest
 rm -rf "$BUILD_DIR"
 

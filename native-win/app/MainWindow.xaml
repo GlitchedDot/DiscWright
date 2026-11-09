@@ -16,7 +16,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:media="using:Microsoft.UI.Xaml.Media"
     xmlns:canvas="using:Microsoft.Graphics.Canvas.UI.Xaml"
-    Title="DiscWright — ATRAC3+ CD ISO maker">
+    Title="WrightDisc — ATRAC3+ CD ISO maker">
 
     <Grid x:Name="RootGrid" Background="{StaticResource ClientGradientBrush}" Padding="12">
         <Grid.Resources>
@@ -56,7 +56,7 @@
                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Grid>
                 <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
-                    <TextBlock Text="DiscWright" Foreground="White" FontSize="20" FontWeight="Bold"/>
+                    <TextBlock Text="WrightDisc" Foreground="White" FontSize="20" FontWeight="Bold"/>
                     <TextBlock Text="ATRAC3+ CD ISO maker" Foreground="{StaticResource SubtitleOnBlueBrush}" FontSize="13"/>
                 </StackPanel>
                 <!-- the web's one visible mode tab, as a pill -->

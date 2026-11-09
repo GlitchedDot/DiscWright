@@ -84,7 +84,7 @@ if defined TOOLS_MISSING (
 set "DOTNET_CLI_TELEMETRY_OPTOUT=1"
 set "DOTNET_NOLOGO=1"
 
-echo Publishing DiscWright as a native single file (Release, x64) with VS MSBuild...
+echo Publishing WrightDisc as a native single file (Release, x64) with VS MSBuild...
 "%MSBUILD%" "%ROOT%app\DiscWright.csproj" /restore /t:Publish /p:Configuration=Release /p:Platform=x64 /p:DiscWrightSingleFile=true /p:PublishDir="%ROOT%SingleFile\\" /nologo /v:m
 if errorlevel 1 (
     echo PUBLISH FAILED - see the errors above.

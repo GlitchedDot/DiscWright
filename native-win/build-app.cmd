@@ -270,7 +270,7 @@ echo atracdenc: built and installed to tools\ ^(with its runtime DLLs^).
 set "DOTNET_CLI_TELEMETRY_OPTOUT=1"
 set "DOTNET_NOLOGO=1"
 
-echo Building DiscWright (Release, x64, self-contained) with VS MSBuild...
+echo Building WrightDisc (Release, x64, self-contained) with VS MSBuild...
 "%MSBUILD%" "%ROOT%app\DiscWright.csproj" /restore /p:Configuration=Release /p:Platform=x64 /nologo /v:m
 if errorlevel 1 (
     echo BUILD FAILED - see the errors above.

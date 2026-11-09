@@ -28,7 +28,7 @@ fi
 # that has never seen Homebrew. cmake is the only build tool
 # left that must already be installed.
 if ! command -v cmake >/dev/null 2>&1 || ! command -v curl >/dev/null 2>&1; then
-  echo "DiscWright needs two free build tools:"
+  echo "WrightDisc needs two free build tools:"
   command -v cmake >/dev/null 2>&1 || echo "  - cmake: MISSING (used to build the encoder)"
   command -v curl >/dev/null 2>&1 || echo "  - curl: MISSING (used once to fetch the libsndfile source)"
   echo ""
@@ -195,7 +195,7 @@ mkdir -p "$APP/Contents/Resources/Licenses"
 cp licenses/GPL-3.0.txt licenses/LGPL-2.1.txt licenses/THIRD-PARTY-NOTICES.txt \
   "$APP/Contents/Resources/Licenses/"
 
-echo "Compiling DiscWright (native core + SwiftUI face; universal)..."
+echo "Compiling WrightDisc (native core + SwiftUI face; universal)..."
 # One compile per architecture, then lipo joins them into the
 # single Contents/MacOS/DiscWright. Targets match the bundle's
 # LSMinimumSystemVersion (13.0). -parse-as-library: the entry

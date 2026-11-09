@@ -7,7 +7,7 @@ import SwiftUI
 @main
 struct DiscWrightApp: App {
   var body: some Scene {
-    WindowGroup("DiscWright — ATRAC3+ CD ISO maker") {
+    WindowGroup("WrightDisc — ATRAC3+ CD ISO maker") {
       ContentView()
     }
     .defaultSize(width: 1180, height: 820)

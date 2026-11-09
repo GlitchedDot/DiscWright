@@ -361,7 +361,7 @@ final class DiscStore: ObservableObject {
     if let isoType = UTType(filenameExtension: "iso") {
       panel.allowedContentTypes = [isoType]
     }
-    panel.message = "Choose an ATRAC CD ISO — DiscWright's or SonicStage's."
+    panel.message = "Choose an ATRAC CD ISO — WrightDisc's or SonicStage's."
     guard panel.runModal() == .OK, let url = panel.url else { return }
     do {
       let data = try Data(contentsOf: url)
@@ -527,7 +527,7 @@ final class DiscStore: ObservableObject {
         self.stageStatus = "Your disc is ready. 💿"
         BurnService.offerBurn(
           iso: isoURL,
-          source: "DiscWright just built this ISO — " +
+          source: "WrightDisc just built this ISO — " +
             "\(total) track\(total == 1 ? "" : "s")."
         ) { [weak self] state in
           guard let self else { return }

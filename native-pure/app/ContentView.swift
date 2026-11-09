@@ -65,7 +65,7 @@ struct ContentView: View {
     HStack(spacing: 12) {
       discGlyph
       VStack(alignment: .leading, spacing: 1) {
-        Text("DiscWright")
+        Text("WrightDisc")
           .font(.title2.bold())
           .foregroundColor(.white)
         Text("ATRAC3+ CD ISO maker")

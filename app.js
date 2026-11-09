@@ -1,4 +1,4 @@
-// DiscWright — page logic.
+// WrightDisc — page logic.
 // Drop audio -> decode (Web Audio, 44.1 kHz) -> arrange into
 // groups -> encode each track with the atracdenc Wasm module ->
 // author the ISO with the proven core -> download.
@@ -1097,7 +1097,7 @@ $("cleanExport").addEventListener("click", async () => {
 
 // ---------------- import ISO ----------------
 // (GlitchedDot, 2026-11-05 — “gravely important”) Open an ISO made
-// earlier — by DiscWright or by SonicStage — and see exactly what
+// earlier — by WrightDisc or by SonicStage — and see exactly what
 // is on it: its groups and tracks, with the names the player
 // shows. An authored disc is finished, so the tracks come in
 // read-only: no renaming, no rearranging, no removing. In the
@@ -1168,7 +1168,7 @@ function refresh() {
   const nowInfo = $("nowInfo");
   if (nowInfo) {
     if (tracks.length === 0) {
-      nowInfo.textContent = "DiscWright";
+      nowInfo.textContent = "WrightDisc";
     } else {
       const secs = Math.round(tracks.reduce((a, t) => a + t.samples, 0) / 44100);
       const hh = String(Math.floor(secs / 3600)).padStart(2, "0");

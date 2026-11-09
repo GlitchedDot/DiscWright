@@ -1,27 +1,28 @@
-# DiscWright — ATRAC3+ CD ISO maker
+# WrightDisc — ATRAC3+ CD ISO maker
 
 by **GlitchedDot**
 
-> **Not the GOG one.** This DiscWright makes ATRAC3+ CDs for Sony
-> ATRAC CD Walkmans. A different, unrelated tool that shares the
-> name turns GOG offline installers into game discs — that's not
-> this, and this isn't that.
+> **Not the GOG one.** This project was originally released as
+> DiscWright — which turned out to be the name of a different,
+> unrelated tool that turns GOG offline installers into game
+> discs. This one (now WrightDisc) makes ATRAC3+ CDs for Sony
+> ATRAC CD Walkmans — that's not this, and this isn't that.
 
-DiscWright makes ATRAC3+ CDs that play in Sony ATRAC CD Walkmans —
+WrightDisc makes ATRAC3+ CDs that play in Sony ATRAC CD Walkmans —
 discs like the ones Sony's SonicStage used to make, for players
 like the D-NE1. Sony discontinued that whole world years ago;
-DiscWright replaces the one SonicStage job that mattered: take
+WrightDisc replaces the one SonicStage job that mattered: take
 your music, get a working ATRAC3+ CD.
 
 It works the way the real discs work. The authoring recipe was
 reverse-engineered from the genuine article and proven on real
-hardware — discs authored by DiscWright play in an actual D-NE1.
+hardware — discs authored by WrightDisc play in an actual D-NE1.
 Your tracks are encoded to 64 kbps ATRAC3+, organized into groups
 (the playlists of the ATRAC CD world — the player navigates by
 them, and every track belongs to exactly one), and written with
 the same layout the original software produced.
 
-DiscWright comes in three forms that share one proven authoring
+WrightDisc comes in three forms that share one proven authoring
 core. Pick whichever fits:
 
 ## The three forms
@@ -124,7 +125,7 @@ for the design and the self-test.
 
 ## A note on how this was made
 
-DiscWright was built by GlitchedDot working with Candy Pebbles,
+WrightDisc was built by GlitchedDot working with Candy Pebbles,
 an AI assistant — the reverse-engineering harness, the authoring
 core, and all three apps were developed in that collaboration,
 with every result verified on real hardware by GlitchedDot.
@@ -133,7 +134,7 @@ native ports.
 
 ## License
 
-DiscWright is Copyright (C) 2026 GlitchedDot, licensed under the
+WrightDisc is Copyright (C) 2026 GlitchedDot, licensed under the
 **GNU General Public License, version 3** — see `LICENSE`.
 
 Third-party components (the atracdenc encoder, libsndfile,

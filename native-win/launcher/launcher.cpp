@@ -199,7 +199,7 @@ void Fail(int stage, const wchar_t* message, DWORD error)
         AppendText(text, textCount, L")");
     }
     if (g_console != INVALID_HANDLE_VALUE) Say(text);
-    MessageBoxW(NULL, text, L"DiscWright", MB_OK | MB_ICONERROR);
+    MessageBoxW(NULL, text, L"WrightDisc", MB_OK | MB_ICONERROR);
     if (g_console != INVALID_HANDLE_VALUE)
     {
         Say(L"Press Enter to close this window...");
@@ -235,7 +235,7 @@ void OpenWatchConsole()
                             FILE_SHARE_WRITE, NULL,
                             OPEN_EXISTING, 0, NULL);
     if (g_console == INVALID_HANDLE_VALUE) return;
-    SetConsoleTitleW(L"DiscWright - unpacking");
+    SetConsoleTitleW(L"WrightDisc - unpacking");
 }
 
 // Join two path fragments with a backslash (no doubling when
@@ -375,7 +375,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
                            (DWORD)(sizeof(selfPath) / sizeof(selfPath[0]))) == 0)
     {
         DWORD err = GetLastError();
-        Fail(1, L"DiscWright could not find its own file path.", err);
+        Fail(1, L"WrightDisc could not find its own file path.", err);
         return 1;
     }
 
@@ -385,7 +385,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
     if (self == INVALID_HANDLE_VALUE)
     {
         DWORD err = GetLastError();
-        Fail(2, L"DiscWright could not open its own file to unpack.", err);
+        Fail(2, L"WrightDisc could not open its own file to unpack.", err);
         return 1;
     }
     LARGE_INTEGER fileSize;
@@ -394,7 +394,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
     if (!sizeOk || fileSize.QuadPart < kFooterSize + 4)
     {
         CloseHandle(self);
-        Fail(2, L"This DiscWright standalone file is damaged "
+        Fail(2, L"This WrightDisc standalone file is damaged "
                 L"(missing payload).", sizeErr);
         return 1;
     }
@@ -413,7 +413,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
     if (!readOk)
     {
         CloseHandle(self);
-        Fail(2, L"This DiscWright standalone file is damaged "
+        Fail(2, L"This WrightDisc standalone file is damaged "
                 L"(missing payload).", readErr);
         return 1;
     }
@@ -425,7 +425,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
     if (!magicOk)
     {
         CloseHandle(self);
-        Fail(3, L"This DiscWright standalone file is damaged "
+        Fail(3, L"This WrightDisc standalone file is damaged "
                 L"(missing payload).", 0);
         return 1;
     }
@@ -447,7 +447,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
         payloadSize > fileBytes - (unsigned long long)kFooterSize)
     {
         CloseHandle(self);
-        Fail(4, L"This DiscWright standalone file is damaged "
+        Fail(4, L"This WrightDisc standalone file is damaged "
                 L"(bad payload size in its footer).", 0);
         return 1;
     }
@@ -457,7 +457,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
         payloadOffset >= fileBytes - (unsigned long long)kFooterSize)
     {
         CloseHandle(self);
-        Fail(4, L"This DiscWright standalone file is damaged "
+        Fail(4, L"This WrightDisc standalone file is damaged "
                 L"(bad payload size in its footer).", 0);
         return 1;
     }
@@ -470,7 +470,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
     if (!sigOk)
     {
         CloseHandle(self);
-        Fail(4, L"This DiscWright standalone file is damaged "
+        Fail(4, L"This WrightDisc standalone file is damaged "
                 L"(its payload is not where the footer says, "
                 L"or is not a zip).", 0);
         return 1;
@@ -485,7 +485,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
                                     &localAppData)) || localAppData == NULL)
     {
         CloseHandle(self);
-        Fail(5, L"DiscWright could not find your local app data folder.", 0);
+        Fail(5, L"WrightDisc could not find your local app data folder.", 0);
         return 1;
     }
     wchar_t folderName[64];
@@ -505,7 +505,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
     if (!pathsOk)
     {
         CloseHandle(self);
-        Fail(5, L"DiscWright's unpack path would be too long.", 0);
+        Fail(5, L"WrightDisc's unpack path would be too long.", 0);
         return 1;
     }
 
@@ -516,14 +516,14 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
         // The watch window opens here, and only here: a
         // repeat launch must stay as invisible as v32's was.
         OpenWatchConsole();
-        Say(L"DiscWright standalone - first run: unpacking");
+        Say(L"WrightDisc standalone - first run: unpacking");
 
         // ---- S6: create the unpack folder ----
         if (!EnsureDirectory(extractDir))
         {
             DWORD err = GetLastError();
             CloseHandle(self);
-            Fail(6, L"DiscWright could not create its unpack "
+            Fail(6, L"WrightDisc could not create its unpack "
                     L"folder under your local app data.", err);
             return 1;
         }
@@ -552,7 +552,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
                       extractDir, L"payload.zip"))
         {
             CloseHandle(self);
-            Fail(7, L"DiscWright's unpack path would be too long.", 0);
+            Fail(7, L"WrightDisc's unpack path would be too long.", 0);
             return 1;
         }
         HANDLE zip = CreateFileW(zipPath, GENERIC_WRITE, 0, NULL,
@@ -561,7 +561,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
         {
             DWORD err = GetLastError();
             CloseHandle(self);
-            Fail(7, L"DiscWright could not write its payload "
+            Fail(7, L"WrightDisc could not write its payload "
                     L"while unpacking.", err);
             return 1;
         }
@@ -616,7 +616,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
         self = INVALID_HANDLE_VALUE;
         if (!copyOk)
         {
-            Fail(8, L"DiscWright could not unpack its payload "
+            Fail(8, L"WrightDisc could not unpack its payload "
                     L"(the file may be damaged).", copyErr);
             return 1;
         }
@@ -644,7 +644,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
                             &startup, &process))
         {
             DWORD err = GetLastError();
-            Fail(9, L"DiscWright could not start tar.exe to "
+            Fail(9, L"WrightDisc could not start tar.exe to "
                     L"unpack itself (Windows 10 1803 or later "
                     L"is required).", err);
             return 1;
@@ -660,7 +660,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
         {
             // payload.zip stays in place on failure, for
             // inspection; it is deleted only on success.
-            Fail(10, L"DiscWright could not unpack itself "
+            Fail(10, L"WrightDisc could not unpack itself "
                      L"(tar.exe failed). The stage line above "
                      L"and unpack.log in the unpack folder "
                      L"have the record.", 0);
@@ -680,7 +680,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
             WriteFile(stampFile, stamp, stampLen, &stampWrote, NULL);
             CloseHandle(stampFile);
         }
-        Say(L"Unpack complete - starting DiscWright");
+        Say(L"Unpack complete - starting WrightDisc");
     }
     if (self != INVALID_HANDLE_VALUE) CloseHandle(self);
 
@@ -701,7 +701,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
                         extractDir, &startup, &process))
     {
         DWORD err = GetLastError();
-        Fail(11, L"DiscWright unpacked but could not start. "
+        Fail(11, L"WrightDisc unpacked but could not start. "
                  L"Try deleting %LOCALAPPDATA%\\DiscWright and "
                  L"running it again.", err);
         return 1;
